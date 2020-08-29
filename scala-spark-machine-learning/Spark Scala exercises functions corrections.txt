@@ -1,0 +1,37 @@
+
+
+//is even number
+def isEven(num : Int) : Boolean = num%2 == 0
+
+//any even in a liste of integers
+def anyEven(liste : List[Int]) : Boolean =
+for (n <- liste)
+{if (n%2 == 0) return true}
+return false
+
+//if 7 in a liste weighted to double
+def LuckyNumberSeven(liste : List[Int]) : Int =
+if (liste contains 7)
+return liste.sum+14
+return liste.sum
+
+//reversable word meaning two way word
+def PalindromeCheck(word : String) : Boolean =
+return (word == word.reverse)
+
+//Balance check
+def balance_check(liste : List[Int]) : Boolean =
+var firsthalf = 0
+var secondhalf = 0
+
+secondhalf = liste.sum
+
+for (item <- Range(0 , liste.length)){
+  firsthalf = firsthalf + liste(item)
+  secondhalf = secondhalf - liste(item)
+  
+  if(secondhalf == firsthalf){
+  return true
+  }
+  }
+  return false

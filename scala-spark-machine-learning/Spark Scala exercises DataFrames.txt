@@ -1,0 +1,39 @@
+import org.apache.spark.sql.SparkSession
+import spark.implicits._
+import org.apache.spark.sql.functions._
+
+val spark = SparkSession.builder().getOrCreate()
+
+val df = spark.read.format("csv").option("header", "true").option("inferSchema" , "true").csv("Netflix_2011_2016.csv")
+
+//columns name
+df.columns
+
+//schema 
+df.printSchema()
+
+//first 5 rows
+df.show(5)
+
+//numerical description
+df.describe()
+
+df2 = df.withColumn("HV Ratio" , df("High Price") / df("Volume"))
+
+//df2.order($"High" , desc).show(1)
+
+df2.select(mean("Close")).show()
+
+df2.select(min("Volume"))
+df2.select(max("Volume"))
+
+df2.select($"Close" < 600).count()
+
+(df.filter($"High" > 500).count()*1.0/df.count())*100
+
+val yeardf = df.withColumn("Year",year(df("Date")))
+val yearmaxs = yeardf.select($"Year" , $"High").groupBy("Year").max()
+
+val monthdf = df.withColumn("Month",month(df("Date")))
+val monthavgs = monthdf.select($"Month" , "Close").groupBy("Month").mean()
+monthavgs.select($"Month" , $"avg(Close)").show()

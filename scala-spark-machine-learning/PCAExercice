@@ -1,0 +1,51 @@
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.feature.{PCA , StandardScaler , VectorAssembler}
+import org.apache.spark.ml.linalg.Vectors
+import org.apache.log4j._
+Logger.getLogger("org").setLevel(Level.ERROR)
+
+val spark = SparkSession.builder().appName("PCA_exercice").getOrCreate()
+
+val data = spark.read.format("txt").option("header","true").option("inferSchema" , "true").csv("Cancer_Data.txt")
+
+
+val colnames = (Array("mean radius", "mean texture", "mean perimeter", "mean area", "mean smoothness",
+"mean compactness", "mean concavity", "mean concave points", "mean symmetry", "mean fractal dimension",
+"radius error", "texture error", "perimeter error", "area error", "smoothness error", "compactness error",
+"concavity error", "concave points error", "symmetry error", "fractal dimension error", "worst radius",
+"worst texture", "worst perimeter", "worst area", "worst smoothness", "worst compactness", "worst concavity",
+"worst concave points", "worst symmetry", "worst fractal dimension"))
+
+val assembler = new VectorAssembler().setInputCols(colnames).setOutputCol("features")
+
+val output = assembler.transform(data).select($"features")
+
+val scaler = new StandardScaler().setInputCol("features").setOutputCol("scaledFeatures").setWithStd(true).setWithMean(false)
+
+val scalerModel = scaler.fit(output)
+val scaledData = scalerModel.transform(output)
+
+
+
+
+
+// Create a new PCA() object that will take in the scaledFeatures
+// and output the pcs features, use 4 principal components
+// Then fit this to the scaledData
+val pca = (new PCA()
+  .setInputCol("scaledFeatures")
+  .setOutputCol("pcaFeatures")
+  .setK(4)
+  .fit(scaledData))
+
+// Once your pca has been created and fit, transform the scaledData
+// Call this new dataframe pcaDF
+val pcaDF = pca.transform(scaledData)
+
+// Show the new pcaFeatures
+val result = pcaDF.select("pcaFeatures")
+result.show()
+
+// Use .head() to confirm that your output column Array of pcaFeatures
+// only has 4 principal components
+result.head(1)
